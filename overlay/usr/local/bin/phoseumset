@@ -1,0 +1,61 @@
+#!/bin/sh
+
+set_webport()
+{
+        sed -Ei "" "s/^Listen [[:digit:]]{1,5}(.*)/Listen $NEWPORT/" /usr/local/etc/apache24/httpd.conf
+        sed -Ei "" "s/^<VirtualHost \*\:[[:digit:]]{1,5}>/<VirtualHost \*\:$NEWPORT>/" /usr/local/etc/apache24/Includes/phoseum.conf
+        exit 0
+}
+
+set_apiport()
+{
+        sed -Ei "" "s/^(\s+)ProxyPass(.*)\:[[:digit:]]{1,5}.*/\1ProxyPass\2:$NEWPORT\//" /usr/local/etc/apache24/Includes/phoseum.conf
+        sed -Ei "" "s/^(\s+)ProxyPass(.*)\:[[:digit:]]{1,5}.*/\1ProxyPass\2:$NEWPORT\//" /usr/local/etc/apache24/Includes/phoseum.conf
+        sed -Ei "" "s/^PORT.*/PORT\: $NEWPORT/" /usr/local/www/phoseum/cfg/phoseum-api-config.yml
+        exit 0
+}
+
+adduser()
+{
+        cd /usr/local/www/phoseum/ && ./create_user_db.rb add $1 $USRLVL "$3"
+        exit 0
+}
+
+set_serversecret()
+{
+  cd /usr/local/www/phoseum/ && ./phoseum-api.rb -n
+}
+
+
+delusers()
+{
+  cd /usr/local/www/phoseum/ && ./create_user_db.rb del $1
+}
+
+
+case $1 in
+        webport)
+          NEWPORT="$2"
+          set_webport
+        ;;
+        apiport)
+          NEWPORT="$2"
+          set_apiport
+        ;;
+        adduser)
+          USRLVL="Super"
+          if [ "$3" != "true" ]; then
+            USRLVL = "User"
+          fi
+          adduser "$2" "$3"
+        ;;
+        serversecret)
+          set_serversecret
+        ;;
+        deluser)
+          delusers $2
+        ;;
+        *)
+          echo "Unknown option"
+        ;;
+esac

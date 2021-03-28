@@ -1,0 +1,51 @@
+#!/bin/sh
+
+get_webport()
+{
+  grep -E '^Listen [[:digit:]]{1,5}(.*)' /usr/local/etc/apache24/httpd.conf | awk '{print $2}'
+  exit 0
+}
+
+get_apiport()
+{
+  grep -E '^PORT' /usr/local/www/phoseum/cfg/phoseum-api-config.yml | awk '{print $2}'
+  exit 0
+}
+
+get_users()
+{
+  cd /usr/local/www/phoseum/ && ./create_user_db.rb list
+}
+
+get_serversecret()
+{
+  cd /usr/local/www/phoseum/ && ./phoseum-api.rb -s | grep secret | awk '{print $5}'
+}
+
+delusers()
+{
+  cd /usr/local/www/phoseum/ && ./create_user_db.rb del $1
+}
+
+
+# Stub for something which gets quasselsettings
+case $1 in
+        webport)
+          get_webport
+        ;;
+        apiport)
+          get_apiport
+        ;;
+        listusers)
+          get_users
+        ;;
+        serversecret)
+          get_serversecret
+        ;;
+        deluser)
+          delusers $2
+        ;;
+        *)
+          echo "Unknown option"
+        ;;
+esac

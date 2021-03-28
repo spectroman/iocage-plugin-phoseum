@@ -1,0 +1,42 @@
+#!/bin/sh
+#
+# $FreeBSD$
+#
+# PROVIDE: phoseum
+# REQUIRE: DAEMON
+# KEYWORD: shutdown
+#
+# Add the following lines to /etc/rc.conf to enable this service:
+#
+# phoseum_enable:        Set to NO by default. Set it to YES to enable it.
+# phoseum_user:          The user account daemon runs as.
+#                            Default is 'phoseum'
+# phoseum_group:         The group associated with username phoseum
+#                            daemon runs as. Default is 'phoseum'
+#
+
+. /etc/rc.subr
+
+name=phoseum
+rcvar=phoseum_enable
+desc="Phoseum your personal museum of photography"
+start_precmd=phoseum_prestart
+
+phoseum_prestart()
+{
+  cd /usr/local/www/phoseum
+  return 0
+}
+
+load_rc_config $name
+
+: ${phoseum_enable="NO"}
+: ${phoseum_user=phoseum}
+: ${phoseum_group=phoseum}
+
+command="/usr/local/www/phoseum/phoseum-api.rb"
+command_args="-d &"
+
+phoseum_flags="${phoseum_flags}"
+
+run_rc_command $1
