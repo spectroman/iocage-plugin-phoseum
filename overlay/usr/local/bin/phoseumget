@@ -27,8 +27,6 @@ delusers()
   cd /usr/local/www/phoseum/ && ./create_user_db.rb del $1
 }
 
-
-# Stub for something which gets quasselsettings
 case $1 in
         webport)
           get_webport
